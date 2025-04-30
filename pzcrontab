@@ -1,0 +1,5 @@
+#execute closePzserver.sh with conf log to pzserver_stop.log
+59 23 * * * /home/pzuser/crontabLogs/crontab_scripts/closePzserver.sh >> /var/log/pzserver_stop.log 2>&1
+
+#execute startPzserver.sh with conf log to pzserver_start.log
+1 0 * * * /home/pzuser/crontabLogs/crontab_scripts/startPzserver.sh >> /var/log/pzserver_start.log 2>&1
