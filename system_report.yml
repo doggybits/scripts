@@ -1,0 +1,58 @@
+---
+- name: System Inventory Report
+  hosts: all
+  gather_facts: yes
+
+  tasks:
+    - name: System Summary Report
+      debug:
+        msg: "\n==================== SYSTEM INVENTORY REPORT ====================\nHostname: {{ ansible_hostname }}\nInventory Name: {{ inventory_hostname }}\n"
+    - name: Hardware Information
+      debug:
+        msg: |
+          --- Hardware ---
+          Vendor:        {{ ansible_system_vendor | default('N/A') }}
+          Product:       {{ ansible_product_name | default('N/A') }}
+          Architecture:  {{ ansible_architecture }}
+          Virtualization Role: {{ ansible_virtualization_role | default('none') }}
+          Hypervisor:    {{ ansible_virtualization_type | default('N/A') }}
+    - name: Operating System
+      debug:
+        msg: |
+          --- Operating System ---
+          Distribution:  {{ ansible_distribution }} {{ ansible_distribution_version }}
+          Kernel:        {{ ansible_kernel }}
+          Package Mgr:   {{ ansible_pkg_mgr }}
+          Service Mgr:   {{ ansible_service_mgr }}
+    - name: CPU Information
+      debug:
+        msg: |
+          --- CPU ---
+          Model:         {{ (ansible_processor | select('search', 'model name') | list | unique | join('; ')) or 'N/A' }}
+          Cores:         {{ ansible_processor_vcpus }}
+    - name: Memory Information
+      debug:
+        msg: |
+          --- Memory ---
+          Total RAM:     {{ ansible_memtotal_mb }} MB ({{ (ansible_memtotal_mb / 1024) | round(1) }} GB)
+          Free RAM:      {{ ansible_memfree_mb }} MB ({{ (ansible_memfree_mb / 1024) | round(1) }} GB)
+    - name: Storage Information
+      debug:
+        msg: |
+          --- Storage ---
+          Root Disk Size: {{ (ansible_mounts | selectattr('mount', 'equalto', '/') | map(attribute='size_total') | first | int // (1024**3)) }} GB
+    - name: Network Information
+      debug:
+        msg: |
+          --- Network ---
+          Default Interface: {{ ansible_default_ipv4.interface | default('N/A') }}
+          Primary IP:        {{ ansible_default_ipv4.address | default('N/A') }}
+          All IPv4 Addresses: {{ ansible_all_ipv4_addresses | join(', ') }}
+    - name: Runtime Information
+      debug:
+        msg: |
+          --- Runtime ---
+          Uptime:        {{ (ansible_uptime_seconds | int // 3600) }} hours
+          Ansible Python: {{ ansible_python.version.major }}.{{ ansible_python.version.minor }}
+
+          ==============================================================
